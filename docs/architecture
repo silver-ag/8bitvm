@@ -1,0 +1,8 @@
+8BITVM architechture description
+
+8BITVM has an 8-bit (shock horror!) address space, five registers and an original (read: terrible) instruction set.
+The registers are called A,B,C,D and I (for Instruction pointer). all are 8-bit. 
+The virtual machine has an address space of 256 (0xff) bytes, of which the last 16 (0xf0 to 0xff) make up the screen buffer, and the previous 16 (0xe0 to 0xef) make up the disk buffer (not yet implemented).
+Since the screen buffer can contain only 16 characters, it seems unlikely that it'll be worth constantly updating the display. As such, an explicit instruction (PRI, opcode 0x05) must be used to print the contents of the screen buffer to the screen.
+This has the additional advantage that it can contain code if necessary in the very small available space.
+In order to make things easier on the programmer in a very restricted environment, 8BITVM allows a 'disk buffer' that would be impractical to create in hardware. Using the MHD (0x??) instruction, a section of the virtual hard drive can be mapped to the disk buffer at 0xe0-0xef. When the FHD (0x??) instruction is used, the contents of the disk buffer will be written to the virtual hard drive in the same place they came from.

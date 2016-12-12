@@ -1,0 +1,37 @@
+8BITVM GREEN CARD
+
+All opcodes are one byte
+
+register names as bytes:
+ 0x01 : A
+ 0x02 : B
+ 0x03 : C
+ 0x04 : D
+ 0x05 : I
+
+MOV-MM [0x01]
+  takes two arguments (the next two bytes) and treats them both as pointers to the byte to move and the place to copy it to.
+
+MOV-MR [0x02]
+  takes two arguments (the next two bytes). treats the first as a pointer to the byte to copy, and the second as the name of the register to copy it to.
+
+MOV-RM [0x03]
+  takes two arguments (the next two bytes). treats the first as a register containing the byte to copy, and the second as a memory address to copy it to.
+
+MOV-RR [0x04]
+  takes two arguments (the next two bytes) and treats them both as registers - one containing the byte to move and one to copy it to.
+
+PRI    [0x05]
+  takes no arguments. prints the contents of the screen buffer (0xf0 to 0xff) to the screen.
+
+HLT    [0x06]
+  takes no arguments. finishes execution.
+
+ADD    [0x07]
+  takes no arguments. sets D to the sum of A and B, wrapping round.
+
+SUB    [0x08]
+  takes no arguments. sets D to A minus B, wrapping round.
+
+NOP    [0x09]
+  takes no arguments. does nothing. very little use when executing one instruction each tick and each one takes a different amount of time, but included for completeness.
