@@ -11,6 +11,10 @@
 (defvar *D* #x00) ;; ...
 (defvar *I* #x00) ;; register for instruction pointer
 
+;; interrupt table
+(defvar itable (make-list 36 :initial-element #x00))
+(defvar ip 0) ;; keeps track of where int is writing to. TODO: remove, and let programmer tell int where to write to.
+
 ;; 8-bit memory space, as a list of bytes
 (defvar memory (make-list #x100 :initial-element #x00))
 
@@ -35,11 +39,11 @@
   (if dbg ((lambda nil (write-string "MOV-MR ") (write from) (write-string " ") (write to) (terpri))))
   (setq *I* (+ 2 *I*))
   (case to
-    (#x01 (setq *A* from))
-    (#x02 (setq *B* from))
-    (#x03 (setq *C* from))
-    (#x04 (setq *D* from))
-    (#x05 (setq *I* from))))
+    (#x01 (setq *A* (nth from memory)))
+    (#x02 (setq *B* (nth from memory)))
+    (#x03 (setq *C* (nth from memory)))
+    (#x04 (setq *D* (nth from memory)))
+    (#x05 (setq *I* (nth from memory)))))
 
 (defun mov-rm (from to)
   (if dbg ((lambda nil (write-string "MOV-RM ") (write from) (write-string " ") (write to) (terpri))))
@@ -112,6 +116,20 @@
 (defun nop ()
   (if dbg (write-line "NOP")))
 
+(defun int (addr)
+  (if dbg (write-string "INT ") (write addr))
+  (setq *I* (1+ *I*))
+  (setf (nth ip itable) addr))
+
+(defun unt (i)
+  (if dbg (write-string "UNT ") (write i))
+  (setq *I* (1+ *I*))
+  (setf (nth i itable) #x00))
+
+(defun cit ()
+  (if dgb (write-line "CIT"))
+  (setq itable (make-list #x36 :initial-element #x00)))
+
 ;; read a byte and deal with it
 (defun exec-addr (addr)
   (let ((instruction (nth addr memory)))
@@ -125,10 +143,13 @@
       (#x07 (add))
       (#x08 (sub))
       (#x09 (nop))
-      (#x09 (write-line "OR"))
-      (#x0a (write-line "XOR"))
-      (#x0b (write-line "AND"))
-      (#x0c (write-line "NOT"))
+      (#x0a (int (nth (+ 1 addr) memory))
+      (#x0b (unt (nth (+ 1 addr) memory))
+      (#x0c (cit))
+      ;(#x09 (write-line "OR"))
+      ;(#x0a (write-line "XOR"))
+      ;(#x0b (write-line "AND"))
+      ;(#x0c (write-line "NOT"))
       (otherwise (error-quit "illegal instruction")))))
 
 ;; run loop
