@@ -1,6 +1,12 @@
 "an 8-bit virtual machine, using a nonexistent architecture. see docs directory."
 "tested using clisp"
 
+(require "asdf.fas")
+(require "acl-compat/acl-compat.asd")
+(asdf:operate 'asdf:load-op :acl-compat)
+
+(import 'acl-compat-mp)
+
 ;; for testing and debugging purposes
 (defvar dbg t)
 
