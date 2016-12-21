@@ -6,10 +6,10 @@
 (write-line "======================")
 (terpri)
 
-(require "include/asdf.fas")
-(require "include/puri/puri.asd")
-(require "include/cl-ppcre/cl-ppcre.asd")
-(require "include/acl-compat/acl-compat.asd")
+(load "include/asdf.lisp")
+(load "include/puri/puri.asd")
+(load "include/cl-ppcre/cl-ppcre.asd")
+(load "include/acl-compat/acl-compat.asd")
 (asdf:operate 'asdf:load-op :acl-compat)
 
 (import 'acl-compat-mp)
@@ -44,7 +44,7 @@
   (exit))
 
 ;; load program into memory
-(let ((program (open (nth 0 *args*) :element-type '(unsigned-byte 8))))
+(let ((program (open (nth 1 *posix-argv*) :element-type '(unsigned-byte 8))))
   (loop for i from #x00 to #xff do
     (setf (nth i memory) (read-byte program nil))))
 
@@ -91,19 +91,19 @@
             (#x03 (setq *B* *C*))
             (#x04 (setq *B* *D*))
             (#x05 (setq *B* *I*))))
-    (#x01 (case to
+    (#x03 (case to
             (#x01 (setq *C* *A*))
             (#x02 (setq *C* *B*))
             (#x03 (setq *C* *C*))
             (#x04 (setq *C* *D*))
             (#x05 (setq *C* *I*))))
-    (#x01 (case to
+    (#x04 (case to
             (#x01 (setq *D* *A*))
             (#x02 (setq *D* *B*))
             (#x03 (setq *D* *C*))
             (#x04 (setq *D* *D*))
             (#x05 (setq *D* *I*))))
-    (#x01 (case to
+    (#x05 (case to
             (#x01 (setq *I* *A*))
             (#x02 (setq *I* *B*))
             (#x03 (setq *I* *C*))
@@ -136,7 +136,7 @@
 (defun nop ()
   (if dbg (write-line "NOP")))
 
-(defun int (addr)
+(defun iint (addr)
   (if dbg (write-string "INT ") (write addr))
   (setq *I* (1+ *I*))
   (setf (nth ip itable) addr))
@@ -147,7 +147,7 @@
   (setf (nth i itable) #x00))
 
 (defun cit ()
-  (if dgb (write-line "CIT"))
+  (if dbg (write-line "CIT"))
   (setq itable (make-list #x36 :initial-element #x00)))
 
 ;; read a byte and deal with it
@@ -163,7 +163,7 @@
       (#x07 (add))
       (#x08 (sub))
       (#x09 (nop))
-      (#x0a (int (nth (+ 1 addr) memory)))
+      (#x0a (iint (nth (+ 1 addr) memory)))
       (#x0b (unt (nth (+ 1 addr) memory)))
       (#x0c (cit))
       ;(#x09 (write-line "OR"))
@@ -178,4 +178,5 @@
            (setq *I* (1+ *I*))))
 
 ;; testing
+
 (run-loop)
