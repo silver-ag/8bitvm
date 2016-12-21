@@ -1,11 +1,25 @@
 "an 8-bit virtual machine, using a nonexistent architecture. see docs directory."
 "tested using clisp"
 
-(require "asdf.fas")
-(require "acl-compat/acl-compat.asd")
+(write-line "======================")
+(write-line " LOADING REQUIREMENTS ")
+(write-line "======================")
+(terpri)
+
+(require "include/asdf.fas")
+(require "include/puri/puri.asd")
+(require "include/cl-ppcre/cl-ppcre.asd")
+(require "include/acl-compat/acl-compat.asd")
 (asdf:operate 'asdf:load-op :acl-compat)
 
 (import 'acl-compat-mp)
+
+(terpri)
+(terpri)
+(write-line "======================")
+(write-line " BEGINNING EXECUTION  ")
+(write-line "======================")
+(terpri)
 
 ;; for testing and debugging purposes
 (defvar dbg t)
