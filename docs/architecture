@@ -2,8 +2,7 @@
 
 8BITVM has an 8-bit (shock horror!) address space, five registers and an original (read: terrible) instruction set.
 The registers are called A,B,C,D and I (for Instruction pointer). all are 8-bit. 
-The virtual machine has an address space of 256 (0xff) bytes, of which the 
-last 16 (0xf0 to 0xff) make up the screen buffer.
+The virtual machine has an address space of 256 (0xff) bytes, of which the last 16 (0xf0 to 0xff) make up the screen buffer, and the 16 before that (0xe0 to 0xef) make up the input buffer.
 Since the screen buffer can contain only 16 characters, it seems unlikely that it'll be worth constantly updating the display. As such, an explicit instruction (PRI, opcode 0x05) must be used to print the contents of the screen buffer to the screen.
 This has the additional advantage that it can contain code if necessary in the very small available space.
 There is a further kind of storage that is only indirectly accessible to 

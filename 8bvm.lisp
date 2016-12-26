@@ -9,8 +9,6 @@
 (import 'sb-thread)
 (import 'sb-ext)
 
-;(load "include/bordeaux-threads/bordeaux-threads.asd")
-
 (terpri)
 (terpri)
 (write-line "======================")
@@ -133,9 +131,9 @@
   (if dbg (write-line "NOP")))
 
 (defun iint (addr)
-  (if dbg (write-string "INT ") (write addr))
+  (if dbg ((lambda nil (write-string "INT ") (write addr))))
   (setq *I* (1+ *I*))
-  (setf interrupt addr))
+  (setf interrupt (- addr 1)))
 
 (defun unt ()
   (if dbg (write-line "UNT"))
@@ -172,11 +170,13 @@
   (loop do (exec-addr *I*)
            (setq *I* (1+ *I*))))
 
-;; testing
+(defun go-int (interrupt input)
+  (loop for c across input for i from #x00 to #x0f do
+      (setf (nth (+ i #xe0) memory) (char-code (char input i))))
+  (setq *I* interrupt))
 
 (defvar cpu (sb-thread:make-thread 'run-loop))
 (loop while t do
-  (read-line)
+  (defvar input (read-line))
   (if (not (eq interrupt 0))
-    (setq *I* interrupt)))
-;(read-line) ;; wierdly, this doesn't request input. It just pauses the main thread until the excution thread exits.
+    (go-int interrupt input)))
