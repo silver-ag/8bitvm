@@ -35,3 +35,11 @@ SUB    [0x08]
 
 NOP    [0x09]
   takes no arguments. does nothing. very little use when executing one instruction each tick and each one takes a different amount of time, but included for completeness.
+
+INT    [0x0a]
+  takes one argument, an address. sets the interrupt register to that address. whenever the 'enter' key is pressed, execution immediatly moves to that address if the interrupt register isn't at 0x00.
+
+UNT    [0x0b]
+  takes no arguments. unsets the interrupt register. equivelant to INT 0x00.
+
+JMP    [0x0c] 

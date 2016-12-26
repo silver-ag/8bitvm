@@ -6,13 +6,10 @@
 (write-line "======================")
 (terpri)
 
-(load "include/asdf.lisp")
-(load "include/puri/puri.asd")
-(load "include/cl-ppcre/cl-ppcre.asd")
-(load "include/acl-compat/acl-compat.asd")
-(asdf:operate 'asdf:load-op :acl-compat)
+(import 'sb-thread)
+(import 'sb-ext)
 
-(import 'acl-compat-mp)
+;(load "include/bordeaux-threads/bordeaux-threads.asd")
 
 (terpri)
 (terpri)
@@ -31,9 +28,8 @@
 (defvar *D* #x00) ;; ...
 (defvar *I* #x00) ;; register for instruction pointer
 
-;; interrupt table
-(defvar itable (make-list 36 :initial-element #x00))
-(defvar ip 0) ;; keeps track of where int is writing to. TODO: remove, and let programmer tell int where to write to.
+;; interrupt target
+(defvar interrupt #x00)
 
 ;; 8-bit memory space, as a list of bytes
 (defvar memory (make-list #x100 :initial-element #x00))
@@ -139,16 +135,15 @@
 (defun iint (addr)
   (if dbg (write-string "INT ") (write addr))
   (setq *I* (1+ *I*))
-  (setf (nth ip itable) addr))
+  (setf interrupt addr))
 
-(defun unt (i)
-  (if dbg (write-string "UNT ") (write i))
+(defun unt ()
+  (if dbg (write-line "UNT"))
   (setq *I* (1+ *I*))
-  (setf (nth i itable) #x00))
+  (setf interrupt #x00))
 
-(defun cit ()
-  (if dbg (write-line "CIT"))
-  (setq itable (make-list #x36 :initial-element #x00)))
+(defun jmp (to)
+  (setq *I* (- to 1)))
 
 ;; read a byte and deal with it
 (defun exec-addr (addr)
@@ -164,8 +159,8 @@
       (#x08 (sub))
       (#x09 (nop))
       (#x0a (iint (nth (+ 1 addr) memory)))
-      (#x0b (unt (nth (+ 1 addr) memory)))
-      (#x0c (cit))
+      (#x0b (unt))
+      (#x0c (jmp (nth (+ 1 addr) memory)))
       ;(#x09 (write-line "OR"))
       ;(#x0a (write-line "XOR"))
       ;(#x0b (write-line "AND"))
@@ -179,4 +174,9 @@
 
 ;; testing
 
-(run-loop)
+(defvar cpu (sb-thread:make-thread 'run-loop))
+(loop while t do
+  (read-line)
+  (if (not (eq interrupt 0))
+    (setq *I* interrupt)))
+;(read-line) ;; wierdly, this doesn't request input. It just pauses the main thread until the excution thread exits.
